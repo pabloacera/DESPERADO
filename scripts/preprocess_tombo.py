@@ -97,7 +97,6 @@ def smooth_event(raw_signal, file_obj, lenght_events):
     return raw_signal_events
 
 
-
 def find_motif_measurements(files, path, number_reads, motif_letter):
     '''
     Find the measurements for specific motifs and take list of lists containing ind signal values for
@@ -126,7 +125,7 @@ def find_motif_measurements(files, path, number_reads, motif_letter):
 
         try:
             ### I am going to use the motif '' and is going to take measurements for the first 3 nc
-            list_inception = raw_signal_events[file_obj.genome_seq.find(motif_letter):file_obj.genome_seq.find(motif_letter)+5]
+            list_inception = raw_signal_events[file_obj.genome_seq.find(motif_letter)-1:file_obj.genome_seq.find(motif_letter)+5]
             smooth_list =  [item for sublist in list_inception for item in sublist]  
             
             motifs.append(smooth_list)
@@ -148,21 +147,19 @@ if __name__ == '__main__':
     NB08_files = os.listdir('/media/labuser/Data/nanopore/pUC19/processed/NB08_obj')
     files_path_mod = '/media/labuser/Data/nanopore/pUC19/processed/NB08_obj'
     
-    motif_letter = ['CCTGGAAGC',
-            	    'CCTGGCCTT',
-		            'CCTGGCGTT',
-		            'CCTGGTATCT',
+    motif_letter = ['CCTGGGGTG',
+                    'CCTGGAAGC',
                     'CCAGGAACC',
-		            'CCAGGCGTTT',
-		            'CCAGGGTTT'
+                    'CCAGGCGTTT',
+                    'CCAGGGTTT'
                    ]
     
     for sequence in motif_letter:
         
-        motif = find_motif_measurements(NB07_files, path, 700, sequence)    
+        motif = find_motif_measurements(NB07_files, path, 1000, sequence)    
         # Select a motif for a number of reads in the test 
-        motif_mod = find_motif_measurements(NB08_files, files_path_mod, 700, sequence)
+        motif_mod = find_motif_measurements(NB08_files, files_path_mod, 1000, sequence)
         
         save_np = '/media/labuser/Data/nanopore/pUC19/processed/numpy/tombo/n_prepro'
-        np.save(save_np+'/motif_'+sequence+'_700', motif)
-        np.save(save_np+'/motif_mod_'+sequence+'_700', motif_mod)
+        np.save(save_np+'/motif6_'+sequence+'_1000', motif)
+        np.save(save_np+'/motif6_mod_'+sequence+'_1000', motif_mod)
