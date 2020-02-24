@@ -178,11 +178,13 @@ class DeepCluster(ClusteringLayer):
             maxiter_DC=7000,
             update_interval=140,
             n_clusters=2,
-            seed_value=42):
+            seed_value=42,
+            verbose=None,
+            file_out=None):
         '''
         Fit the model 
         '''
-        if not x:
+        if x is None:
             autoencoder, encoder = self.autoencoderConv1D(self.signal_shape)
             autoencoder.compile(optimizer='adadelta', loss='mse')
             clustering_layer = ClusteringLayer(n_clusters, name='clustering')(encoder.output)
@@ -205,12 +207,13 @@ class DeepCluster(ClusteringLayer):
         
         if shuffle_:
             x, y = shuffle(x, y, random_state=seed_value)
-    
+        
         # Baseline1 raw data
         kmeans = KMeans(n_clusters=n_clusters, n_init=20, n_jobs=10, random_state = seed_value)
         y_pred_kmeans = kmeans.fit_predict(x.reshape((x.shape[0], x.shape[1])))
         
-        print('Acc. k-means', self.accuracy(y, y_pred_kmeans))
+        if file_out:
+            file_out.write('Acc. k-means : '+str(self.accuracy(y, y_pred_kmeans))+'\n')
         
         batch_size = batch_size_au
         
@@ -224,7 +227,9 @@ class DeepCluster(ClusteringLayer):
         # Baseline 2
         kmeans = KMeans(n_clusters=n_clusters, n_init=20, n_jobs=10, random_state=42)
         y_pred_kmeans = kmeans.fit_predict(encoder.predict(x))
-        print('Acc. Autoencoder', self.accuracy(y, y_pred_kmeans))
+        
+        if file_out:
+            file_out.write('Acc. Autoencoder : '+str(self.accuracy(y, y_pred_kmeans))+'\n')
        
         # build the clustering layer
         clustering_layer = ClusteringLayer(n_clusters, name='clustering')(encoder.output)
@@ -264,7 +269,8 @@ class DeepCluster(ClusteringLayer):
                     ari = ari_f(y, y_pred)
                     nmi = nmi_f(y, y_pred)
                     loss = loss
-                    #print('Iter %d: acc = %.5f, nmi = %.5f, ari = %.5f' % (ite, acc, nmi, ari), ' ; loss=', loss)
+                    if verbose:
+                        print('Iter %d: acc = %.5f, nmi = %.5f, ari = %.5f' % (ite, acc, nmi, ari), ' ; loss=', loss)
 
             idx = index_array[index * batch_size: min((index+1) * batch_size, x.shape[0])]
             loss = model.train_on_batch(x=x[idx], y=[p[idx], x[idx]])

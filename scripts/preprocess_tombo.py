@@ -125,7 +125,7 @@ def find_motif_measurements(files, path, number_reads, motif_letter):
 
         try:
             ### I am going to use the motif '' and is going to take measurements for the first 3 nc
-            list_inception = raw_signal_events[file_obj.genome_seq.find(motif_letter)-1:file_obj.genome_seq.find(motif_letter)+5]
+            list_inception = raw_signal_events[file_obj.genome_seq.find(motif_letter):file_obj.genome_seq.find(motif_letter)+5]
             smooth_list =  [item for sublist in list_inception for item in sublist]  
             
             motifs.append(smooth_list)
@@ -160,6 +160,6 @@ if __name__ == '__main__':
         # Select a motif for a number of reads in the test 
         motif_mod = find_motif_measurements(NB08_files, files_path_mod, 1000, sequence)
         
-        save_np = '/media/labuser/Data/nanopore/pUC19/processed/numpy/tombo/n_prepro'
-        np.save(save_np+'/motif6_'+sequence+'_1000', motif)
-        np.save(save_np+'/motif6_mod_'+sequence+'_1000', motif_mod)
+        save_np = '/media/labuser/Data/nanopore/pUC19/processed/numpy/tombo/n_prepro/5-mers'
+        np.save(save_np+'/motif_'+sequence+'_1000', motif)
+        np.save(save_np+'/motif_mod_'+sequence+'_1000', motif_mod)
