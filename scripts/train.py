@@ -42,7 +42,7 @@ motif_tombo5 = [
 path = '/media/labuser/Data/nanopore/pUC19/processed/numpy/tombo/n_prepro/5-mers/1000/'
 
 
-file_out = '/media/labuser/Data/nanopore/DESPERADO/results/tombo_results_5_2'
+file_out = '/media/labuser/Data/nanopore/DESPERADO/results/tombo_results_5_kmenasCOP'
 f = open(file_out, "w")
 
 for motif in motif_tombo5:
@@ -78,7 +78,8 @@ for motif in motif_tombo5:
                    seed_value=seed_value, 
                    shuffle_=False, 
                    verbose=True,
-                   file_out=f)
+                   file_out=f,
+                   N_no_mod=900)
     
     predictions_train, _ = DC.predict(train_x, verbose=0)
     labels = predictions_train.argmax(1)

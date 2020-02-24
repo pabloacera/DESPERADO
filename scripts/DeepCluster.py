@@ -46,6 +46,8 @@ from tensorflow import set_random_seed
 from sklearn.metrics import davies_bouldin_score # use this to measure how good clusters are
 from sklearn.utils.linear_assignment_ import linear_assignment
 from keras.models import load_model
+from copkmeans.cop_kmeans import cop_kmeans
+import itertools
 
 
 class ClusteringLayer(Layer):
@@ -180,7 +182,8 @@ class DeepCluster(ClusteringLayer):
             n_clusters=2,
             seed_value=42,
             verbose=None,
-            file_out=None):
+            file_out=None,
+            N_no_mod=None):
         '''
         Fit the model 
         '''
@@ -209,11 +212,15 @@ class DeepCluster(ClusteringLayer):
             x, y = shuffle(x, y, random_state=seed_value)
         
         # Baseline1 raw data
-        kmeans = KMeans(n_clusters=n_clusters, n_init=20, n_jobs=10, random_state = seed_value)
-        y_pred_kmeans = kmeans.fit_predict(x.reshape((x.shape[0], x.shape[1])))
+        #kmeans = KMeans(n_clusters=n_clusters, n_init=20, n_jobs=10, random_state = seed_value)
+        #y_pred_kmeans = kmeans.fit_predict(x.reshape((x.shape[0], x.shape[1])))
+        
+        # baseline data with cop-kmeans
+        must_link = list(itertools.combinations(np.arange(0,900), 2))
+        y_pred_kmeans, centers = cop_kmeans(dataset=x, k=2, ml=must_link)
         
         if file_out:
-            file_out.write('Acc. k-means : '+str(self.accuracy(y, y_pred_kmeans))+'\n')
+            file_out.write('Acc. k-means : '+str(self.accuracy(y, np.array(y_pred_kmeans)))+'\n')
         
         batch_size = batch_size_au
         
@@ -225,11 +232,13 @@ class DeepCluster(ClusteringLayer):
         autoencoder.fit(x, x, batch_size=batch_size, epochs=pretrain_epochs)
         
         # Baseline 2
-        kmeans = KMeans(n_clusters=n_clusters, n_init=20, n_jobs=10, random_state=42)
-        y_pred_kmeans = kmeans.fit_predict(encoder.predict(x))
+        #kmeans = KMeans(n_clusters=n_clusters, n_init=20, n_jobs=10, random_state=42)
+        #y_pred_kmeans = kmeans.fit_predict(encoder.predict(x))
+        y_pred_kmeans, centers = cop_kmeans(dataset=encoder.predict(x), k=2, ml=must_link)
+        
         
         if file_out:
-            file_out.write('Acc. Autoencoder : '+str(self.accuracy(y, y_pred_kmeans))+'\n')
+            file_out.write('Acc. Autoencoder : '+str(self.accuracy(y, np.array(y_pred_kmeans)))+'\n')
        
         # build the clustering layer
         clustering_layer = ClusteringLayer(n_clusters, name='clustering')(encoder.output)
@@ -239,9 +248,10 @@ class DeepCluster(ClusteringLayer):
         
         model.compile(loss=['kld', 'mse'], loss_weights=[0.3, 1], optimizer='adam')
         model.summary()
-
+        
+        centers = np.array(centers).reshape((2,5))
         #Initialize cluster centers k-means
-        model.get_layer(name='clustering').set_weights([kmeans.cluster_centers_])
+        model.get_layer(name='clustering').set_weights([centers])
         
         loss = 0
         index = 0
