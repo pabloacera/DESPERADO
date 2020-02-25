@@ -236,7 +236,6 @@ class DeepCluster(ClusteringLayer):
         #y_pred_kmeans = kmeans.fit_predict(encoder.predict(x))
         y_pred_kmeans, centers = cop_kmeans(dataset=encoder.predict(x), k=2, ml=must_link)
         
-        
         if file_out:
             file_out.write('Acc. Autoencoder : '+str(self.accuracy(y, np.array(y_pred_kmeans)))+'\n')
        
@@ -246,7 +245,7 @@ class DeepCluster(ClusteringLayer):
         model = Model(inputs=encoder.input,
                       outputs=[clustering_layer, autoencoder.output])
         
-        model.compile(loss=['kld', 'mse'], loss_weights=[0.3, 1], optimizer='adam')
+        model.compile(loss=['kld', 'mse'], loss_weights=[0.1, 1], optimizer='adam')
         model.summary()
         
         centers = np.array(centers).reshape((2,5))
@@ -271,7 +270,8 @@ class DeepCluster(ClusteringLayer):
             if ite % update_interval == 0:
                 q, _  = model.predict(x, verbose=0)
                 p = target_distribution(q)  # update the auxiliary target distribution p
-        
+                
+                p[:N_no_mod] = p[:N_no_mod] 
                 # evaluate the clustering performance
                 y_pred = q.argmax(1)
                 if y is not None:

@@ -42,7 +42,7 @@ motif_tombo5 = [
 path = '/media/labuser/Data/nanopore/pUC19/processed/numpy/tombo/n_prepro/5-mers/1000/'
 
 
-file_out = '/media/labuser/Data/nanopore/DESPERADO/results/tombo_results_5_kmenasCOP'
+file_out = '/media/labuser/Data/nanopore/DESPERADO/results/tombo_results_5_kmenasCOP+semi'
 f = open(file_out, "w")
 
 for motif in motif_tombo5:
